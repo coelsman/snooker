@@ -70,6 +70,17 @@
 		font-size: 14px;
   		font-weight: 500;
 	}
+	.weather-city-info .city-name a {
+		text-decoration: none;
+		color: #222;
+		cursor: pointer;
+		display: block;
+	}
+	.weather-city-info .city-name:hover a {
+		color: #44b;
+		text-decoration: underline;
+		cursor: pointer;
+	}
 	.weather-city-info .national-name {
 		font-size: 13px;
   		color: #777;
@@ -174,7 +185,7 @@
 			var _lng = parseFloat(cityData.CityLongtitude);
 			var _temp_c = cityData.Weather.main.temp - 273.15;
 			var _content = '<div class="weather-city-info">' +
-				'<div class="city-name">'+cityData.CityName+'</div>' + 
+				'<div class="city-name"><a href="'+baseUrl+'weather/city&id='+cityData.CityIDService+'">'+cityData.CityName+'</a></div>' + 
 				'<div class="national-name">'+countryCode.getCountryByCode(cityData.CountryCode)+'</div>' + 
 				'<div class="temperature">' + 
 					'<span class="temperature-c">'+_temp_c.toFixed(2)+' &ordm;C</span>' + 

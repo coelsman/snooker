@@ -5,6 +5,43 @@ class WeatherController extends Controller {
 		$this->render('index');
 	}
 
+	public function actionCity() {
+		if (Yii::app()->request->getQuery('id')) {
+			$dataCity = Yii::app()->db->createCommand()
+				->select 	('WC.name as CityName, WC.latitude CityLatitude, WC.longtitude CityLongtitude,'.
+					' WC.api_id CityIDService, WC.last_updated LastUpdate, WC.weather_now Weather, WC.country_code CountryCode,'.
+					' WC.last_updated_forecast LastUpdateForecast, WC.forecast_5 Forecast5')
+				->from 		('weather_city WC')
+				->where 	('WC.api_id = :id', array(
+					'id' => Yii::app()->request->getQuery('id')
+				))->queryRow();
+			$gettingTime = time();
+			$dataCity['Weather'] = json_decode($dataCity['Weather']);
+
+			if ($gettingTime - $dataCity['LastUpdateForecast'] > 10800) {
+				$curl = new CurlFetcher;
+				$curl->url = 'http://api.openweathermap.org/data/2.5/forecast';
+				$curl->query = '?id='.$dataCity['CityIDService'];
+				$curlData = $curl->fetchData();
+
+				$dataCity['Forecast5'] = json_decode($curlData);
+
+				$objWeather = WeatherCity::model()->findByAttributes(array('api_id'=>$dataCity['CityIDService']));
+				$objWeather->last_updated_forecast = $gettingTime;
+				$objWeather->forecast_5 = $curlData;
+				$objWeather->update();
+			} else {
+				$dataCity['Forecast5'] = json_decode($dataCity['Forecast5']);
+			}
+
+			$this->render('city', array(
+				'dataCity' => $dataCity
+			));
+		} else {
+			// $this->render('//404/index');
+		}
+	}
+
 	public function actionGetListCitiesInMapBound() {
 		$northernMost = (double)Yii::app()->request->getQuery('northernMost');
 		$southernMost = (double)Yii::app()->request->getQuery('southernMost');
